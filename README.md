@@ -1,4 +1,5 @@
 # SAA-C02 Notes
+
 > These are my personal notes from Adrian Cantrill's (SAA-C02) course.
 Learning Aids from
 [aws-sa-associate-saac02](https://github.com/acantril/aws-sa-associate-saac02).
@@ -3288,11 +3289,7 @@ the complexity or the overhead of weighted routing.
 
 ## Relational-Database-Service-RDS
 
-### Database Refresher
-
-Systems to store and manage data.
-
-#### Relational (SQL)
+### Relational (SQL)
 
 - Structured Query Language (SQL) is a feature of most RDS.
 - Structure to the data known as a **schema**.
@@ -3310,26 +3307,26 @@ SQL systems are relational so we generally define relationships between
 tables as well. This is defined with a **join table**.
 A join table has a **composite key** which is a key formed of two parts.
 Composite keys together must be unique.
-
 Keys in different tables are how the relationships between the tables
-are defined.
+are defined. It allows a human from table to have multiple animals, and
+one animal to belong to multiple humans.
 
 The Table schema and relationships must be defined in advance which can be
 hard to do.
 
-#### Non-Relational (NoSQL)
+### Non-Relational (NoSQL)
 
 Not a single thing, and is a catch all for everything else.
 There is generally no schema or a weak one.
 
-##### Key-Value databases
+#### Key-Value databases
 
 This is just a list of keys and value pairs.
 So long as every key is unique, there is no real schema or structure needed.
 These are really fast and highly scalable.
 This is also used for **in memory caching**.
 
-##### Wide Column Store
+#### Wide Column Store
 
 DynamoDB is an example of wide column store database.
 
@@ -3346,7 +3343,7 @@ the same between values.
 The only requirements is that every item inside the table has to use the same
 key structure and it has to have a unique key.
 
-##### Document
+#### Document
 
 Documents are generally formatted using JSON or XML.
 
@@ -3358,7 +3355,7 @@ Good for order databases, or collections, or contact stale databases.
 
 Great for nested data items within a document structure such as user profiles.
 
-##### Row Database (MySQL)
+#### Row Database (MySQL)
 
 Often called OLTP (Online Transactional Processing Databases).
 
@@ -3369,7 +3366,7 @@ need to check for each row.
 Great for things which deal in rows and items where they are constantly
 accessed, modified, and removed.
 
-##### Column Database (Redshift)
+#### Column Database (Redshift)
 
 Instead of storing data in rows on disk, they store it based on columns.
 The data is the same, but it's grouped together on disk, based on
@@ -3379,7 +3376,9 @@ size, and price are all grouped together.
 This is bad for transactional style processing, but great for reporting or when
 all values for a specific size are required.
 
-##### Graph
+#### Graph
+
+**Amazon Neptune** is a fully managed version of this.
 
 Relationships between things are formally defined and stored along in the
 database itself with the data.
@@ -3448,9 +3447,9 @@ same tooling as if you were accessing a self-managed database.
 
 The database can be optimized for:
 
-db.m5 general
-db.r5 memory
-db.t3 burst
+- db.m5 general
+- db.r5 memory
+- db.t3 burst
 
 There is an associated size and AZ selected.
 
@@ -3460,9 +3459,9 @@ RDS is vulnerable to failures in that AZ.
 
 The storage can be allocated with SSD or magnetic.
 
-io1 - lots of IOPS and consistent low latency
-gp2 - same burst pool architecture as it does on EC2, used by default
-magnetic - compatibility mostly for long term historic uses
+- io1: lots of IOPS and consistent low latency
+- gp2: same burst pool architecture as it does on EC2, used by default
+- magnetic: compatibility mostly for long term historic uses
 
 Billing is per instance and hourly rate for that compute. You are billed
 for storage allocated.
@@ -3474,7 +3473,7 @@ Secondary hardware is allocated inside another AZ. This is referred to as
 the standby replica or standby replica instance. The standby replica has
 its own storage in the same AZ as it's located.
 
-RDS enables synchronous replication from the primary instance to the
+RDS enables **synchronous replication** from the primary instance to the
 standby replica.
 
 RDS Access ONLY via database CNAME. The CNAME will point at the primary
@@ -3525,7 +3524,7 @@ RTO - Recovery Time Objective
 
 RDS Backups
 
-First snap is full copy of the data used on the RDS volume. From then on,
+**First snap is full copy of the data used on the RDS volume**. From then on,
 the snapshots are incremental and only store the change in data.
 
 When any snapshot occurs, there's a brief interruption to the flow of data
@@ -3597,13 +3596,11 @@ Read Replicas provide near 0 RPO
 
 Aurora architecture is VERY different from RDS.
 
-It uses a **cluster** which is:
+It uses a **cluster**, a single primary instance and 0 or more replicas.
 
-- A single primary instance and 0 or more replicas.
 - The replicas within Aurora can be used for reads during normal operation.
   - Provides benefits of RDS multi-AZ and read-replicas.
-- Aurora doesn't use local storage for the compute instances.
-  - An Aurora cluster has a shared cluster volume.
+- An Aurora cluster has a shared cluster volume for the compute instances.
   - Provides faster provisioning.
   - Improved availability.
   - Better performance.
@@ -3611,7 +3608,7 @@ It uses a **cluster** which is:
 Aurora cluster functions across a number of availability zones.
 
 There is a primary instance and a number of replicas.
-The read applications from applications can use the replicas.
+Applications can use the replicas for READ operations.
 
 There is a shared storage of **max 64 TiB** across all replicas.
 This uses 6 copies across AZs.
@@ -3632,8 +3629,8 @@ can be a failover target. The failover operation will be quicker because
 it doesn't have to make any storage modifications.
 
 - Cluster shared volume is based on SSD storage by default.
-  - Provides so high IOPS and low latency.
-  - No way to select magnetic storage.
+  - Provides high IOPS and low latency.
+  - No option for magnetic storage.
 - Aurora cluster does not specify the amount of storage needed.
   - This is based on what is consumed.
 - High water mark billing or billed for the most used.
@@ -3860,7 +3857,7 @@ Without load balancing, this could bring additional problems.
 
 #### Load Balancers Architecture
 
-The user connects to a load balancer that is set to listens on port 80 and 443.
+The user connects to a load balancer that is set to listen on port 80 and 443.
 
 Within AWS, the configuration for which ports the load balancer listens on is
 called a **listener**.
@@ -4802,20 +4799,34 @@ is required.
 - Hybrid Storage Virtual Application (On-premise)
   - Can be run inside AWS as part of certain disaster recovery scenarios
   - Allows for migration of existing infrastructure into AWS slowly.
+
 - Tape Gateway (VTL) Mode
   - Virtual Tapes are stored on S3
+  - Pretends to be a **iSCSI tape**
+  - 100 GiB to 5 TiB. 1PB total storage across 1500 virtual tapes.
+
 - File Mode (SMB and NFS)
   - File Storage Backed by S3 Objects
-- Volume Mode (Gateway Stored)
+
+- Volume Gateway
+  - Volumes use iSCSI for network based servers to access. Single connection
+  per volume unless servers are clustered.
+  - 32 volume max
+
+- Volume Gateway (Stored Mode)
+  - 16TB per volume 512TB total capacity
   - Block Storage backed by S3 and EBS
-  - Great for disaster recovery
-  - Data is kept locally
-  - Awesome for migrations
-- Volume Mode (Cache Mode)
-  - Data as added to gateway is not stored locally.
-  - Backup to EBS Snapshots
-  - Primarily stored on AWS
-  - Great for limited local storage capacity.
+  - Primary data is stored on-premises. Backup data is async in AWS.
+  - Backups are stored as **EBS snapshots** and later used to create EBS
+  volumes. Great for migrations into AWS or DR.
+
+- Volume Gateway (Cache Mode)
+  - 32TB per volume 1PB total capacity
+  - Data as added to gateway is not stored locally and is sent to AWS.
+  - Has a local cache for quickly accessed often used data which is rotated
+  based on access patterns.
+  - Backup to EBS Snapshots.
+  - Great for limited local storage capacity or decommissioning local storage.
 
 ### Snowball / Edge / Snowmobile
 
@@ -4864,23 +4875,33 @@ a centralized management and authentication. You can sign into multiple
 devices with the same username and password.
 
 One common directory is **Active Directory** by Microsoft and its full name is
-**Microsoft Active Directory Domain Services** or AD DS.
+**Microsoft Active Directory Domain Services** or **AD DS**.
 
 - AWS managed implementation.
 - Runs within a VPC as a private service.
 - Provides HA by deploying into multiple AZs.
-- Certain services in AWS need a directory, Amazon Workspaces.
+- Certain services in AWS need a directory
+  - **Amazon Workspaces** is virtual Desktop as a Service.
 - To join EC2 instances to a domain you need a directory.
 - Can be isolated inside AWS only or integrated with existing on-prem system.
 - Connect Mode allows you to proxy back to on-premises.
 
 #### Directory Modes
 
-- **Simple AD**: should be default. Designed for simple requirements.
-- **Microsoft AD**: is anything with Windows or if it needs a trust relationship
-with on-prem. This is not an emulation or adjusted by AWS.
-- **AD Connector**: Use AWS services without storing any directory info in the
-cloud, it proxies to your on-prem directory.
+- **Simple AD** should be default.
+  - Designed for simple requirements. Not allowed to integrate with on-prem.
+  - Open source Samba 4
+  - Small mode: 500 users
+  - Large mode: 5000 users
+- **AWS Managed Microsoft AD**
+  - creates an instance of directory service in AWS
+  - uses Windows and can establish a trust relationship with on-prem over VPN
+  or a direct connection.
+  - if the VPN fails, AWS services which rely on directory can still function
+  - forms a full directory service and not an emulation adjusted by AWS.
+- **AD Connector**
+  - proxies to your on-prem directory
+  - Use AWS services without storing any directory info in the cloud
 
 ### AWS DataSync
 
