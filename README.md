@@ -32,13 +32,15 @@ and show support <https://learn.cantrill.io.>
 
 Cloud computing provides
 
-1. On-Demand Self-Service: Provision and terminate using a UI/CLI without
+1. On-Demand Self-Service: Provision and terminate capabilities as needed using a UI/CLI without
 human interaction.
-2. Broad Network Access: Access services over any networks on any devices using
-standard protocols and methods.
-3. Resource Pooling: Economies of scale, cheaper service.
+2. Broad Network Access: Access services over any networks, on any devices using
+standard protocols and methods ( http, https, ssh, RDP, vpn )
+3. Resource Pooling: Abstraction and Economies of scale , cheaper service.
+    - There is a sense of location indepdence, no control or knowledge ver the exact location of the resources ( If you instruct provider to create a EC2 in X location, provider is free to use the datacentre , hardware they want. )
+    - Resources are pooled to serve multiple consumers using a multi-tenant model.
 4. Rapid Elasticity: Scale up and down automatically in response to system load.
-5. Measured Service: Usage is measured. Pay only for what you consume.
+5. Measured Service: Resource Usage is measured. It can be monitored, controlled, reported and BILLED. Pay only for what you consume.
 
 ### Public vs Private vs Multi Cloud
 
