@@ -78,21 +78,28 @@ There are additional services such as *Function as a Service*,
 ## OSI 7-layer model
 
 ### Media-layers
-  1) Physical layer
+  - Physical layer
     - Physical Shared medium
     - Standards for transmitting onto the medium
     - Standards for receiving from the medium.
     - No access control.
     - No uniquely identified devices, no method for device to device communication. Everything is broadcasted using      transmission on shared medium.
 
-  2) Data Link 
-  3) Network
+  - Data Link ( CSMA/CD)
+    The data link layer builds on a functional physical layer and adds device unique IDs (MAC address) and controls access to the shared medium .. and detects and mitigates collisions. The data link layer is one of the most important layers, and creates the foundational networking layer which supports Layer 3 IP .. which is how the internet functions.
+    - identifiable devices
+    - Media access control ( sharing)
+    - Collision Detection
+    - Unicast .. 1-1
+    - Broadcast 1-ALL
+    - Switches
+  - Network
 
 ### Host Layers
-  4) Transport
-  5) Session
-  6) Presentation
-  7) Application
+  - Transport
+  - Session
+  - Presentation
+  - Application
 
 ## AWS-Fundamentals
 
