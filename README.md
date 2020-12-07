@@ -37,15 +37,15 @@ human interaction.
 2. Broad Network Access: Access services over any networks, on any devices using
 standard protocols and methods ( http, https, ssh, RDP, vpn )
 3. Resource Pooling: Abstraction and Economies of scale , cheaper service.
-    - There is a sense of location indepdence, no control or knowledge ver the exact location of the resources ( If you instruct provider to create a EC2 in X location, provider is free to use the datacentre , hardware they want. )
+    - There is a sense of location independence, no control or knowledge over the exact location of the resources ( If you instruct provider to create a EC2 in X location, provider is free to use the datacentre , hardware they want. )
     - Resources are pooled to serve multiple consumers using a multi-tenant model.
 4. Rapid Elasticity: Scale up and down automatically in response to system load.
 5. Measured Service: Resource Usage is measured. It can be monitored, controlled, reported and BILLED. Pay only for what you consume.
 
-### Public vs Private vs Multi Cloud
+### Public vs Private vs Hybrid vs Multi Cloud
 
 - Public Cloud: using 1 public cloud such as AWS, Azure, Google Cloud.
-- Private Cloud: using on-premises real cloud. Must meet 5 requirements.
+- Private Cloud: using on-premises real cloud. Must meet 5 requirements. Examples AWS outposts, Azure stack, Anthos from google.
 - Multi-Cloud: using more than 1 public cloud in one deployment.
 - Hybrid Cloud: using public and private clouds in one environment
   - This is **NOT** using Public Cloud and Legacy on-premises hardware.
@@ -75,6 +75,24 @@ There are additional services such as *Function as a Service*,
 *Container as a Service*, and *DataBase as a Service* which be explained later.
 
 ---
+## OSI 7-layer model
+
+### Media-layers
+  1) Physical layer
+    - Physical Shared medium
+    - Standards for transmitting onto the medium
+    - Standards for receiving from the medium.
+    - No access control.
+    - No uniquely identified devices, no method for device to device communication. Everything is broadcasted using      transmission on shared medium.
+
+  2) Data Link 
+  3) Network
+
+### Host Layers
+  4) Transport
+  5) Session
+  6) Presentation
+  7) Application
 
 ## AWS-Fundamentals
 
