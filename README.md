@@ -79,13 +79,23 @@ There are additional services such as *Function as a Service*,
 
 ### Media-layers
   - Physical layer
-    - Physical Shared medium
+    - Physical Shared medium ( can be Copper (electrical), Fibre (light) or WIFI (RF))
     - Standards for transmitting onto the medium
     - Standards for receiving from the medium.
+    - Layer 1 ( Physical) specifications define the transmission and reception of RAW BIT STREAMS between a device and 
+      a SHARED physical medium. It defines things like voltage levels, timings, rates, distances. modulation and connectors.
     - No access control.
     - No uniquely identified devices, no method for device to device communication. Everything is broadcasted using      transmission on shared medium.
 
-  - Data Link ( CSMA/CD)
+  - Data Link ( CSMA/CD) - Frame
+    Frames are format of information to send over Layer 2 network. 
+    - Preamble/SFD - 56 bits(Start Frame Delimiter) : Allow devices to know the start of frame.
+    - Destination/source Mac Addresses
+    - Ether Type (ET) - Specifiy which layer 3 protocol(IP protocol commonly) used to keep data inside frame.
+    - Payload - Data the frame carries from source to destination
+    - Frame Check Sequence - 32 bits (FCS) : Used to detect any errors in frame aka CRC check.
+    CarrierSendsMultipleAccess(CSMA)  - Checks if the shared medium (Layer1) is available or in use.
+    Collision Detection (CD) - If collision is detected, then a JAM signal is sent by all devices detected in collision and random backoff occurs. After backoff time transmission is retried.
     The data link layer builds on a functional physical layer and adds device unique IDs (MAC address) and controls access to the shared medium .. and detects and mitigates collisions. The data link layer is one of the most important layers, and creates the foundational networking layer which supports Layer 3 IP .. which is how the internet functions.
     - identifiable devices
     - Media access control ( sharing)
@@ -93,10 +103,27 @@ There are additional services such as *Function as a Service*,
     - Unicast .. 1-1
     - Broadcast 1-ALL
     - Switches
+    Devices at L2 have unique hardware (MAC) address
+    
   - Network
+    The network layer adds the ability for cross-network addressing (IP Addresses). It allows packets to be routed across different layer 2 networks, via L2 Frame encapsulation and forwarding decisions using routes and route tables. Its Layer 3 which allows the internet to function
+    - IP Addresses (IPV4/6) - cross network addressing.
+    - ARP - Find the Mac address, for this IP
+    - Route - Where to forward this packet
+    - Route Tables - Multiple routes
+    - Router - Moves packets from source to destination - encapsulating the packets in different L2 frames on the way.
+    - Device <=> Device Communications over the internet
+    - No method for channels of communications .. SRC IP <=> Dest IP
+    - Packets can be delivered out of order. Each packet is routed independently. L3 provides no ordering mechanism.
+      Also packets can go missing due to network outages.
+    - With layer 3 , there are no communication channels- packets have a source and destination IP but no method of 
+      splitting by APP or CHANNEL.
 
 ### Host Layers
   - Transport
+    The transport layer adds Ports, error correction, retransmission, flow control and a connection orientated architecture.
+    
+    
   - Session
   - Presentation
   - Application
