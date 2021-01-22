@@ -117,12 +117,29 @@ There are additional services such as *Function as a Service*,
     - Packets can be delivered out of order. Each packet is routed independently. L3 provides no ordering mechanism.
       Also packets can go missing due to network outages.
     - With layer 3 , there are no communication channels- packets have a source and destination IP but no method of 
-      splitting by APP or CHANNEL.
+      splitting by APP or CHANNEL. Example : email and youtube parallely accessing internet. There is no way to distinguish the 
+      packets here, they feel like coming from same source.
 
 ### Host Layers
   - Transport
     The transport layer adds Ports, error correction, retransmission, flow control and a connection orientated architecture.
-    
+    Below are the Layer 3 problems :-
+  - Since each packet is routed independently from source IP to dest IP , it results in out of order packets at the destination
+    L3 provides no ordering mechanism.
+  - L3 communication in not guaranteed to be reliable.Packets can be lost en route ( TTL)
+  - In L3 no flow control. If source transmits faster than the destination can recieve it can saturate the destination causing
+    packet loss.
+    Above problems are addressed in layer 4 
+  - TCP introduces segments. TCP segments are encapsulated within IP Packets. Segments don't have SRC and DST IP's since the 
+    packets provide device addressing.
+  - Segments introduces 
+    SOURCE PORT
+    Destination PORT
+    SEQUENCE number
+    ACKNOWLEDGEMENT
+    WINDOW
+    CHECKSUM
+    URGENT POINTER 
     
   - Session
   - Presentation
