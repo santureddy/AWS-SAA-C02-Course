@@ -133,13 +133,14 @@ There are additional services such as *Function as a Service*,
   - TCP introduces segments. TCP segments are encapsulated within IP Packets. Segments don't have SRC and DST IP's since the 
     packets provide device addressing.
   - Segments introduces 
-    SOURCE PORT
-    Destination PORT
-    SEQUENCE number
-    ACKNOWLEDGEMENT
-    WINDOW
-    CHECKSUM
-    URGENT POINTER 
+    - SOURCE PORT
+    - Destination PORT
+    - SEQUENCE number
+    - ACKNOWLEDGEMENT
+    - WINDOW
+    - CHECKSUM
+    - URGENT POINTER
+    - Data 
     
   - Session
   - Presentation
