@@ -127,7 +127,7 @@ There are additional services such as *Function as a Service*,
   - Since each packet is routed independently from source IP to dest IP , it results in out of order packets at the destination
     L3 provides no ordering mechanism.
   - L3 communication in not guaranteed to be reliable.Packets can be lost en route ( TTL)
-  - In L3 no flow control. If source transmits faster than the destination can recieve it can saturate the destination causing
+  - In L3 no flow control. If source transmits faster than the destination can recieve, it can saturate the destination causing
     packet loss.
     Above problems are addressed in layer 4 
   - TCP introduces segments. TCP segments are encapsulated within IP Packets. Segments don't have SRC and DST IP's since the 
@@ -135,12 +135,14 @@ There are additional services such as *Function as a Service*,
   - Segments introduces 
     - SOURCE PORT
     - Destination PORT
-    - SEQUENCE number
-    - ACKNOWLEDGEMENT
-    - WINDOW
-    - CHECKSUM
+    - SEQUENCE number : Incremented with each segment sent and unique. 
+    - ACKNOWLEDGEMENT : Way one side can indicate it received using sequence number.
+    - WINDOW : Number of bytes destination willing to receive between acknowledgements. Implements flow control problem.
+    - CHECKSUM : Error checking and can arrange for re transmission of data.
     - URGENT POINTER
     - Data 
+  - TCP is a connection based protocol. A connection is established between two devices using a random port on a client and a    known port on server.
+    - Network Address Translation (NAT) is the process of adjusting packets source and destination addresses to allow transit across different networks. The main types you will encounter are Static NAT, Dynamic NAT and Port Address Translation (PAT). NAT is most commonly experience in home or office networks where private IPv4 addresses are translated to a single public address, allowing outgoing internet access. 
     
   - Session
   - Presentation
