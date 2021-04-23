@@ -147,6 +147,7 @@ There are additional services such as *Function as a Service*,
   - Session
   - Presentation
   - Application
+    - Secure Sockets Layer (SSL) and Transport Layer Security (TLS) are what provides the encrypted communications for HTTPS and other encrypted connection oriented protocols
 
 ## AWS-Fundamentals
 
@@ -245,8 +246,11 @@ not be relied on.
 VPC is a virtual network inside of AWS.
 A VPC is within 1 account and 1 region which makes it regionally resilient.
 A VPC is private and isolated until decided otherwise.
+Two Types of VPC's exist :- 
+ - Default VPC
+ - Custom _VPC's_
 
-One default VPC per region. Can have many custom VPCs which are all private
+  VPC per region. Can have many custom VPCs which are all private
 by default.
 
 #### Default VPC Facts
