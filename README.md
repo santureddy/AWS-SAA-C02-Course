@@ -1121,8 +1121,8 @@ bucket.
 This is a **resource policy**
 
 - controls who has access to that resource
-- can allow or deny access from different accounts
-- can allow or deny anonymous principals
+- can allow or deny access for **same or different accounts**
+- can allow or deny **Anonymous principals**
   - this is explicitly declared in the bucket policy itself.
 
 Different from an **identity policy**
@@ -1135,7 +1135,7 @@ Each bucket can only have one policy, but it can have multiple statements.
 
 #### ACLs (Legacy)
 
-A way to apply a subresource to objects and buckets.
+A way to apply security to objects or buckets. They are **subresource** level.
 These are legacy and AWS does not recommend their use.
 They are inflexible and allow simple permissions.
 
@@ -1260,8 +1260,7 @@ S3 Accelerated Transfer
 - Uses the network of AWS edge locations to speed up transfer.
 - Bucket name cannot contain periods.
 - Name must be DNS compatible.
-- Benefits improve the larger the location and distance.
-  - The worse the start, the better the performance benefits.
+- Benefits improve if the upload location and distance is far from bucket location.
 
 ### Encryption 101
 
@@ -1328,8 +1327,8 @@ parties know how the data will be hidden.
 - Regional service
   - Every region is isolated when using KMS.
 - Public service
-  - Occupies the AWS public zone and can be connected to from anywhere.
-- Create, store, and manage keys.
+  - Occupies the AWS public zone and can be connected to from anywhere provided you are authorized.
+- Create, store, and manage cryptographic keys.
   - Can handle both symmetric and asymmetric keys.
 - KMS can perform cryptographic operations itself.
 - Keys never leave KMS.
@@ -1339,12 +1338,12 @@ parties know how the data will be hidden.
 
 #### CMKs - Customer Master Keys
 
-- Managed by KMS and used within cryptographic operations.
+- Main thing managed by KMS and used within cryptographic operations.
 - AWS services, applications, and the user can all use them.
 - Think of them as a container for the actual physical master keys.
 - These are all backed by **physical** key material.
 - You can generate or import the key material.
-- CMKs can be used for up to **4KB of data**.
+- CMKs can be used to directly encrypt/decrypt data of maximum size **4KB**
 
 It is logical and contains
 
@@ -1390,12 +1389,12 @@ Architecture
   as S3 which uses KMS for encryption.
 - Customer managed CMKS
   - Created explicitly by the customer.
-  - Much more more configurable, for example the key policy can be edited.
+  - Much more configurable, for example the key policy can be edited.
   - Can allow other AWS accounts access to CMKS
 
 All CMKs support key rotation.
 
-- AWS automatically rotates the keys every 1095 days (3 years)
+- AWS automatically rotates AWS managed CMK every 1095 days (3 years)
 - Customer managed keys rotate every year.
 
 CMK itself contains:
@@ -1500,9 +1499,10 @@ the keys are used, but has little admin overhead.
 SSE-S3 Encryption Steps
 
 1. When putting data into S3, only need to provide plaintext.
-2. S3 generates fully managed and rotated **master key** automatically.
-3. Object generates a key specific for each object that is uploaded.
-4. The master key is used to encrypt the specific object key, and the
+2. S3 generates fully managed and rotated **master key** automatically for all the encryption process.
+It isn't visible to us and handled internally by s3.
+3. S3 generates a new key specific for each object that is uploaded.
+4. The master key is then used to encrypt that specific object key used in step 3 above, and the
 unencrypted version of that key is discarded.
 5. The encrypted file and encrypted key are stored side by side in S3.
 
@@ -1516,7 +1516,7 @@ Three Problems with this method:
 
 Much like SSE-S3, where AWS handles both the keys and encryption process.
 KMS handles the master key and not S3. The first time an object is uploaded,
-S3 works with KMS to create an AWS managed CMK. This is the default key
+S3 works with KMS to create an AWS managed CMK. This is the default master key
 which gets used in the future.
 
 Every time an object is uploaded, S3 uses a dedicated key to encrypt that object
@@ -1554,15 +1554,20 @@ Objects in S3 are stored in a specific region.
 - Default AWS storage class that's used in S3, should be user default as well.
 - S3 Standard is region resilient, and can tolerate the failure of an AZ.
 - Objects are replicated to at least 3+ AZs when they are uploaded.
-- 99999999999% durability
+- **Content MD5 Checksums** and Cyclic redundancy checks(**CRCs**) are used to detect and fix any data corruption.
+- 99.999999999% durability , for 10,000,000 objects, 1 object loss per 10,000 years.
 - 99.99% availability
 - Offers low latency and high throughput.
-- No minimums, delays, or penalties.
-- Billing is storage fee, data transfer fee, and request based charge.
+- Billing is storage fee (GB/month), data transfer fee(1$ for GB of transfer OUT(IN is FREE)), and request based charge(
+  price per 1000 requests).
+- No specific retrival fee , no minimum duration for objects stored, no minimum object size.
+- When objects are stored a **HTTP/1.1 200 OK** response is provided by the S3 API Endpoint.
+- Data accessable immediately, it has a **milliseconds first byte latency**. When data is requested , it is available in milliseconds and objects can be made publicly available.
+- Use S3 standard for **Frequently accessed** data which is **important** and **Non Replacable** 
 
 All of the other storage classes trade some of these compromises for another.
 
-#### S3 Standard-IA
+#### S3 Standard-IA ( Infrequent Access)
 
 - Designed for less frequent rapid access when it is needed.
 - Cheaper rate to store data you will rarely need, but if you do need it, you
@@ -1570,8 +1575,9 @@ need it quickly.
 - ~54% cheaper than S3 standard.
 - Minimum 128KB charge for each object.
   - Cost benefits might be negated for smaller objects.
-- 30 days minimum duration charge per object.
-- Retrieval fee for every GB of data retrieved from this class.
+- **30 days minimum duration charge per object**, objects can be stored for less, but the minimum billing always applies.
+- **Retrieval fee for every GB of data** retrieved from this class.
+- However small the objects are stored , a **minimum of 128KB per object** is charged.
 - 99.9% availability, slightly lower than standard S3.
 
 Designed for data that isn't accessed often, long term storage, backups,
@@ -1592,7 +1598,7 @@ place to store the output from another data set.
 
 #### S3 Glacier
 
-- No immediate access to objects, retrieval in minutes or hours.
+- No immediate access to objects, **retrieval in minutes or hours**.
 - Make a request to access objects then after a duration, you get access.
   - Retrieval time anywhere from 1 min - 12 hrs
 - Secure, durable, and low cost storage for archival data.
@@ -1602,6 +1608,7 @@ place to store the output from another data set.
 - 3+ AZ replication
 - 40KB minimum object capacity charge
 - 90 days minimum storage duration charge.
+- Glacier is used to store **archival data** where **frequent or realtime access isn't needed**
 
 Retrieval methods:
 
@@ -1611,20 +1618,24 @@ Retrieval methods:
 
 #### S3 Glacier Deep Archive
 
+- Costs 1/4th of the price of Glacier.
 - Designed for long term backups and as a tape-drive replacement.
 - 4.3% of the base cost of S3 standard
+- 40KB of minimum billable size.
 - 180 days minimum storage duration charge.
-- Standard retrieval within 12 hours, bulk retrieval in 48 hours.
+- Standard **retrieval within 12 hours, bulk retrieval in 48 hours**. Much longer than Glacier.
+- Deep archive is used for **Archival data that rarely if ever needs to be accessed. E.g Legal or Regulation data storage. 
 - Cannot use to make data public or download normally.
 
 #### S3 Intelligent-Tiering
 
-- Combination of standard and standard IA.
+- Intelligent-Tiering **monitors** and **automatically** moves any objects **not accessed for 30 days** to a **low cost infrequent access tier** and eventually to **archive** or **deep archive** tiers.
 - Uses automation to remove overhead of moving objects.
 - Additional fee of $0.0025 per 1,000 objects tracked.
-- If an object is not accessed for 30 days, it will move into Standard-IA.
-
+- If an object is not accessed for 30 days, it will move into Standard-IA automatically. From there objects can be moved two archive tiers ( 90 days for glacier and 180 days for deep archive )
+- As objects are **accessed**, they are **moved back to the frequent access** tier automatically without retrieval costs. Only a **30 day minimum duration**. 
 This is good for objects that are unknown their access pattern.
+- It should be used for **long-lived data**, with **changing or unknown** patterns.
 
 ### Object Lifecycle Management
 
@@ -1632,9 +1643,12 @@ Intelligent-Tiering is used for objects where access patterns is unknown.
 A lifecycle configuration is a set of **rules** that consists of **actions**.
 
 #### Transition Actions
+- Smaller objects can **cost more**( due to minimum size chargable)
+- **Minimum of 30 days** before transition from S3 Standard i,e objects has to stay a minimum of 30 days in standard before transitioning to IA or one-zone IA.
+- A **single rule** cannot transition to Standard IA, Intelligent-tiering or One zone-IA and then to **either glacier type** within **30 days(duration minimums)**. But you can have other rule to move immediately from IA to glacier but you suffer minimum billable duration charges.
 
-Change the storage class over time such as:
-
+Change the storage class over time.
+Example:
 - Move an object from S3 to IA after 90 days
 - After 180 days move to Glacier
 - After one year move to Deep Archive
