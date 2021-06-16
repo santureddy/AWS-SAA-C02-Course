@@ -643,7 +643,7 @@ allowing domain registration
 Has relationships with all major registries
 
 - Route 53 will check with the top level domain to see if the name is available
-- Router 53 creates a zonefile for the domain to be registered
+- Route 53 creates a zonefile for the domain to be registered
 - Allocates nameservice for that zone
   - Generally four of these for one individual zone
   - This is a hosted zone
@@ -1749,20 +1749,43 @@ a certain date and time as requested by the IAM admin user.
 The object will not allow access because your user does not have access.
 - When using the URL the permission that you have access to, match the identity
 that generated it at the moment the item is being accessed.
-- If you get an access deny it means the ID never had access, or lost it.
-- Don't generate presigned URLs with an IAM role.
+- If you get an access deny it means the Identity never had access, or lost it.
+- **Don't generate presigned URLs with an IAM role**.
   - The role will likely expire before the URL does.
+  - CLI command to generate presigned url is 
+    - **aws s3 presign <<s3-URI>> --expires-in <<seconds>>**
 
 ### S3 Select and Glacier Select
 
 This provides a ways to retrieve parts of objects and not the entire object.
 
 If you retrieve a 5TB object, it takes time and consumes 5TB of data.
-Filtering at the client side doesn't reduce this cost.
+Filtering on data at the client side doesn't reduce this cost.
 
 S3 and Glacier select lets you use SQL-like statements to select part of the
 object which is returned in a filtered way.
 The filtering happens at the S3 service itself saving time and data.
+
+### S3 Events
+
+- Notifications generated when events occur in a bucket.
+- .. can be delivered to SNS, SQS and Lambda Functions.
+- Events can be generated when :-
+  - Object created ( Put, post, copy, CompleteMultiPartUpload)
+  - Object delete (*, Delete, DeleteMarkerCreated )
+  - Object Restore (Post(initiated), Completed )
+  - Replication (OperationMissedThreshhold, OperationReplicatedAfterThreshhold, OperationNotTracked, OperationFailedReplication )
+- EventBridge is an alternative which supports more type of events and more services.
+
+### S3 Access logs 
+
+- To understand who/what is accessing a source bucket/objects , we create a target bucket where this log information is stored into.
+- Can be enabled using  **Console UI/ PUT Bucket Logging** operations using CLI/API.
+- Logging is managed by system named **S3 Log Delivery Group** which reads logging configuration set on source bucket. To enable this we need a bucket ACL to allow S3 Log delivery group to write access target bucket.
+- Under best efforts, access logs of source buckets are logged in target bucket within a few hours.
+- Logs are delivered as **Log files**, each log file consists of **Log Records with new line delimited**. Each record consists of attributes which are space-delimited such as time and date requsted, requestor, error codes etc.
+- Single target bucket can be used for logging multiple source buckets using prefixes in target bucket.
+- Security patterns and audits are few use cases.
 
 ---
 
@@ -1776,6 +1799,7 @@ Dotted decimal notation for human readability.
 
 - 4 numbers from 0 to 255 separated by a period.
 - Octet are the numbers between the period.
+- Networks are allocated by **Regional Internet Registries(RIR)**
 
 There are just over 4 billion addresses.
 This was not very flexible because it was either too small or large for
@@ -1798,14 +1822,14 @@ some corporations. Some IP addresses was always left unused.
 
 These can't communicate over the internet and are used internally only
 
-- One class A network: `10.0.0.0` - `10.255.255.255`
+- Single class A network: `10.0.0.0` - `10.255.255.255`
 - 16 Class B networks: `172.16.0.0` - `172.31.255.255`
 - 256 Class C networks: `192.168.0.0` - `192.168.255.255`
 
 #### Classless inter-domain routing (CIDR)
 
 CIDR networks are represented by the starting IP address of the network
-called the network address and the prefix.
+called the network address and the prefix(represents size of the network)
 
 CIDR Example: `10.0.0.0/16`
 
@@ -1977,14 +2001,14 @@ If using `10.16.16.0/20` (`10.16.16.0` - `10.16.31.255`)
 
 - Network address: `10.16.16.0`
 - Network + 1: `10.16.16.1` - VPC Router
-- Network + 2: `10.16.16.2` - Reserved for DNS
+- Network + 2: `10.16.16.2` - Reserved ( DNS* )
 - Network + 3: `10.16.16.3` - Reserved for future AWS use
 - Broadcast Address: `10.16.31.255` (Last IP in subnet)
 
 #### DHCP Options Set
 
 This is how computing devices receive IP addresses automatically. There is
-one options set applied to a VPC at one time and this configuration flows
+one option set applied to VPC at one time and this configuration flows
 through to subnets.
 
 - This can be changed, can create new ones, but you cannot edit one.
@@ -2003,19 +2027,15 @@ through to subnets.
 
 ### VPC Routing and Internet Gateway
 
-VPC Router is a highly available device available in every VPC which moves
+- VPC Router is a highly available device available present in every VPC(both in default VPC and custom VPC ) which moves
 traffic from somewhere to somewhere else.
-Router has a network interface in every subnet in the VPC.
-Routes traffic between subnets.
-
-Route tables defines what the VPC router will do with traffic
-when data leaves that subnet.
-A VPC is created with a main route table. If you don't associate a custom
-route table with a subnet, it uses the main route table of the VPC.
-
-If you do associate a custom route table you create with a subnet, then the
-main route table is disassociated. A subnet can only have one route table
-associated at a time, but a route table can be associated by many subnets.
+- Runs in all the AZ's VPC is available.
+- Router has a network interface in every subnet in the VPC and has **network + 1** address.
+- Routes traffic between subnets.
+- VPC Router is controlled by Route tables(each subnet has) which defines what the VPC router will do with traffic
+  when data leaves that subnet.
+- A VPC is created with a main route table. If you don't associate a custom route table with a subnet, it uses the main route table of the VPC.
+- If you do associate a custom route table you create with a subnet, then the main route table is disassociated. A subnet can only have one route table associated at a time, but a route table can be associated by many subnets.
 
 #### Route Tables
 
@@ -2023,22 +2043,23 @@ When traffic leaves the subnet that this route table is associated with, the
 VPC router reviews the IP packets looking for the destination address.
 The traffic will try to match the route against the route table. If there
 are more than one routes found as a match, the prefix is used as a priority.
-The higher the prefix, the more specific the route, thus higher priority.
+The higher the prefix, the more specific the route, thus higher priority.Once the route is finalized based on destination address match then the VPC router sends the traffic to its destination which is determined by Target field Value.
+Ideally target field points to AWS Gateway or local.
 If the target says local, that means the destination is in the VPC itself.
-Local route can never be updated, they're always present and the local route
-always takes priority. This is the exception to the prefix rule.
+Local routes can never be updated, they're always present and the local route
+always takes priority. They match VPC CIDR range. This is the exception to the prefix rule.
 
-#### Internet Gateway
+#### Internet Gateway(IGW)
 
 A managed service that allows gateway traffic between the VPC and the internet
 or AWS Public Zones (S3, SQS, SNS, etc.)
 
-- Regional resilient gateway attached to a VPC.
+- **Regional resilient** gateway attached to a VPC.
 - One IGW will cover all AZ's in a region the VPC is using.
 - A VPC can have either:
   - No IGW and be entirely private.
   - One IGW
-- IGW can be created and attached to no VPC.
+- IGW can be created and attached to no VPC or can be attached to only one VPC.
 - Runs from within the AWS public zone.
 
 #### Using IGW
@@ -2048,7 +2069,7 @@ In this example, an EC2 instance has:
 - Private IP address of 10.16.16.20
 - Public address of 43.250.192.20
 
-The public address is not public and connected to the EC2 instance itself.
+The public address is not public and not connected to the EC2 instance itself.
 Instead, the IGW creates a record that links the instance's private IP
 to the public IP. This is why when an EC2 instance is created it only
 sees the private IP address. This is IMPORTANT. For IPv4 it is not configured
@@ -2067,8 +2088,8 @@ It changes the packet source IP address from the linux EC2 server and puts
 on the public IP address that is routed from that instance. The IGW then
 pushes that packet on the public internet.
 
-On the return, the inverse happens. As far as it is concerned, it does not know
-about the private address and instead uses the instance's public IP address.
+On the return, the inverse happens. As far as linux update service is concerned, it does not know
+about the private address of instance and instead uses the instance's public IP address.
 
 If the instance uses an IPv6 address, that public address is good to go. The IGW
 does not translate the packet and only pushes it to a gateway.
@@ -2083,6 +2104,11 @@ Used as a management point or as an entry point for a private only VPC.
 This is an inbound management point. Can be configured to only allow
 specific IP addresses or to authenticate with SSH. It can also integrate
 with your on premise identification service.
+
+#### Steps to make Web Subnets public
+- Create an IGW and attach to the custom VPC.
+- Create route table for subnets we want to make public, then associate the subnets with the route table, then add two  routes in RT one for each IPV4(0.0.0.0/0) and IPV6(::/0) traffic. Their target would be IGW created in above step.
+- One each of the web subnets, configure the subnet to auto assign public IPV4 address.
 
 ### Network Access Control List (NACL)
 
@@ -2282,7 +2308,7 @@ handles it all. In EC2 this feature is called **enhanced networking**.
 
 ### EC2 Architecture and Resilience
 
-EC2 instances are virtual machines run on EC2 hosts.
+EC2 instances are virtual machines that run on EC2 hosts.
 
 Tenancy:
 
@@ -2443,13 +2469,24 @@ This is the **baseline performance**
 Default for boot volumes and should be the default for data volumes.
 Can only be attached to one EC2 instance at a time.
 
-#### Provisioned IOPS SSD (io1)
+**GP3** volume starts with standard of 3000 IOPS & 125MB/s and is 20% cheaper than GP2  
+At extra cost performance can  be pushed to 16000 IOPS or 1,000 MB/s manually.
+Can be used for virtual desktops, medium sized databases, low latency interactive apps, boot volumes.
+
+
+#### Provisioned IOPS SSD (io1/2)
+
+With io1/2/BlockExpress IOPS can be adjusted independently of size and are designed for super high performance situations with low latency and consistency.
+
 
 You pay for capacity and the IOPs set on the volume.
 This is good if your volume size is small but need a lot of IOPS.
 
-50:1 IOPS to GiB Ratio
-64,000 is the max IOPS per volume assuming 16 KiB I/O.
+50:1 IOPS to GiB Ratio for io1 , for io2 it is 500IOPS/GB and 1000 IOPS/GB for blockexpress.
+64,000 is the max IOPS per volume assuming 16 KiB I/O ( 4 x GP2/3) and 1000 MB/s throughput.
+
+With io2 blockexpress we can achieve 256000 IOPS per volume and 4000 MB/s throughput.
+
 
 Good for latency sensitive workloads such as mongoDB.
 Multi-attach allows them to attach to multiple EC2 instances at once.
@@ -2458,7 +2495,7 @@ Multi-attach allows them to attach to multiple EC2 instances at once.
 
 - great value
 - great for high throughput vs IOPs
-- 500 GiB - 16 TiB
+- 125 GiB - 16 TiB
 - Neither can be used for EC2 boot volumes.
 - Good for streaming data on a hard disk.
   - Media conversion with large amounts of storage.
@@ -2470,12 +2507,12 @@ Multi-attach allows them to attach to multiple EC2 instances at once.
 
 Two types
 
-- st1
+- st1 ( Throughput Optimized)
   - Starts at 1 TiB of credit per TiB of volume size.
   - 40 MB/s baseline per TiB
   - Burst of 250 MB/s per TiB
   - Max t-put of 500 MB/s
-- sc1
+- sc1 (Cold HDD)
   - Designed for less frequently accessed data, it fills slower.
   - 12 MB/s baseline per TiB
   - Burst of 80 MB/s per TiB
@@ -2520,10 +2557,10 @@ at all.
 
 - Instance store volumes are local to EC2 host.
 - Can only be added at launch time. Cannot be added later.
-- Any data on instance store data is lost if it gets moved, or resized.
-- Highest data performance in all of AWS.
+- Any data on instance store data is lost if it gets moved, or resized or hardware failure.
+- Highest data performance within AWS.
 - You pay for it anyway, it's included in the price.
-- TEMPORARY
+- Instance store volumes are TEMPORARY
 
 ### EBS vs Instance Store
 
@@ -2538,8 +2575,13 @@ When to use EBS
 - Multi-attach feature of **io1**
   - Can create a multi shared volume.
 - Region resilient backups.
-- Require up to 64,000 IOPS and 1,000 MiB/s per volume
-- Require up to 80,000 IOPS and 2,375 MB/s per instance
+- Cheap/ Cost efficient EBS -- ST1 or SC1 since they are mechanical storage (HDD)
+- For throughput or streaming it should be  ST1
+- For boot volumes -- NOT ST1 or SC1
+- GP2/3 -- up to 16,000 IOPS per volume.
+- IO1/2 -- up to 64000 IOPS (*256000 for IO2 BLOCKEXPRESS ), need to remember these high level of performances only is    possible if we use larger instance types.
+- You can take together individual EBS volumes and create a RAID0 set which gets combined performance of the individual EBS vloumes upto a max of 260,000 IOPS (Max possible IOPS on EC2 instance)
+- More than 260,000 IOPS if required then go for instance store volumes.
 
 When to use Instance Store
 
@@ -5136,10 +5178,10 @@ hardware security module (HSM) that's hosted within the AWS cloud.
 AWS provisions the HW, but it is impossible for them to help. There is no way
 to recover data from them if access is lost.
 
-Fully FIPS 140-2 Level 3 (KSM is L2 overall, but some is L3)
+Fully FIPS 140-2 Level 3 (KMS is L2 overall, but some is L3)
 IF you require level 3 overall, you MUST use CloudHSM.
 
-KSM all actions are performed with AWS CLI and IAM roles.
+KMS all actions are performed with AWS CLI and IAM roles.
 
 HSM will not integrate with AWS by design and uses industry standard APIs.
 
