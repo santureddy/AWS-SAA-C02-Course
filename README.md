@@ -2220,24 +2220,34 @@ that boundary. If the resource is in the same subnet, it will not do anything.
 
 ### Network Address Translation (NAT) Gateway
 
-Set of different processes that can address IP packets by changing
-their source or destination addresses.
+- Set of different processes that can adjust IP packets by changing
+their source or destination IP addresses.
+- NAT hides many Private IP addresses to one single IP address.
+- Using NAT Gateway, resources in private subnet can access internet, but incoming connections aren't allowed.
 
-**IP masquerading**, hides CIDR block behind one IP. This allows many IPv4
+**IP masquerading**, hides whole private single CIDR block behind one IP. This allows many IPv4
 addresses to use one public IP for **outgoing** internet access.
 Incoming connections don't work. Outgoing connections can get a response
 returned.
 
-- Must run from a public subnet to allow for public IP address.
-  - Internet Gateway subnets configure to allocate public IPv4 addresses
-  and default routes for those subnets pointing at the IGW.
+- Must run from a public subnet so that NATGW has one private and one public address.
+  - Route table in private subnet has a route to this NATGW in public subnet for originating requests in private subnet.
+  - Route table in public subnet where NAT is located, has a route defined for traffic from NATGW to IGW.
+  - Assume instance1 in private subnet is 10.16.1.0 and trying to connect to 1.1.1.1 ( google.com ).  
+    - Initially source is 10.16.1.0 and destination is 1.1.1.1
+    - Defalut route in private subnet route table now routes packet to NAT GW.
+    - NAT GW makes a record of data packet. It saves the destination address ( 1.1.1.1) , source address and other details which help iy identify specific conversation. Remember NATGW communicates with multiple instances at same time. So NATGW maintains translation table which stores IP addresses ( source and Dest ), port numbers, etc . 
+    - NAT GW  then adjusts the packet, changes source address to NATGW address.( private address of NAT GW)
+    - NAT GW then forrwards to IGW by VPC router, as the route table in public subnet where NAT gateway is present has this default route.
+    - IGW then adjusts the packets source address to NAT GW Public address associated with it and sends request to 1.1.1.1
+    - NAT GW primary job is allow multiple private IP addresses to masquade behind the IP address it has.
 - Uses Elastic IPs (Static IPv4 Public)
   - Don't change
-  - Allocated to your account
+  - Allocated to your account in a region.
 - AZ resilient service , but HA in that AZ.
   - If that AZ fails, there is no recovery.
-- For a fully region resilient service, you must deploy one NATGW in each AZ
-with a Route Table in each AZ with NATGW as target.
+  - For a fully region resilient service, you must deploy one NATGW in each AZ
+    with a Route Table in each AZ with NATGW as target.
 - Managed service, scales up to 45 Gbps. Can deploy multiple NATGW to increase
 bandwidth.
 - AWS charges on usage per hour and data volume processed.
