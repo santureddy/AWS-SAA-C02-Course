@@ -4966,23 +4966,40 @@ is required.
 
 ### Storage Gateway
 
-- Hybrid Storage Virtual Application (On-premise)
+- Hybrid Storage Virtual Application (On-premise) desgined to run in existing on-premise environment, such as VMWARE.
   - Can be run inside AWS as part of certain disaster recovery scenarios
   - Allows for migration of existing infrastructure into AWS slowly.
+  - **Extension** of **File** and **Volume** Storage into AWS. ALlows for data centre extension, situtaion where you are running low on storage capacity and want to extend that capacity.
+  - Allows to keep Volume storage locally but have data replicated asynchronously into AWS ( Backups )
+  - Migrate existing Tape backups into AWS.
+  - Supports **migartion** of existing computing infrastructure into AWS.
+  - Storage gateway communicates with AWS over HTTPS using public endpoint.
+
 - Tape Gateway (VTL) Mode
-  - Virtual Tapes are stored on S3
-- File Mode (SMB and NFS)
-  - File Storage Backed by S3 Objects
-- Volume Mode (Gateway Stored)
-  - Block Storage backed by S3 and EBS
+  - Virtual Tapes are stored on S3 and then to Glacier ( Tape shelf aka virtual tapes (VTS))
+  - Storage Gateway pretends to be a **iSCSI tape library, changer and drive**
+
+- File Gateway Mode (SMB and NFS)
+  - Files are stores in Storage gateway using NFS/SMB on on-premise and these are stored on S3 directly as objects ( Mapped 1-1)
+  - **Life cycle policies** can automatically control **Storage classes** on S3.
+  - Can be integrated with **active directory** for file **authorisation**
+
+- Volume Mode (Gateway Stored) - iSCSI
+  - Storage gateway running locally on-premises and has local storage and upload buffer.
+  - **primary** data is stored **on-premises**, backup data is **asynchronously** replicated to AWS.
+  - AWS side creates **EBS snapshots** from backup data. Can be used to **create standard EBS volumes**. Ideal for migration to AWS.
   - Great for disaster recovery
   - Data is kept locally
   - Awesome for migrations
-- Volume Mode (Cache Mode)
-  - Data as added to gateway is not stored locally.
-  - Backup to EBS Snapshots
-  - Primarily stored on AWS
-  - Great for limited local storage capacity.
+
+- Volume Mode (Cache Mode) - iSCSI
+  - is designed for extensions into AWS.
+  - Data as added to storage gateway is not stored locally.
+  - **primary** data is stored in **AWS**, data which is **accessed frequently** is **cached** locally. Ideal for **extending** storage into AWS.
+  - Primary data is stored on a **S3-Backed Volume**(AWS managed bucket)
+  - Backup to EBS Snapshots.
+    - Snapshots are stored as **standard EBS Snapshots**. 
+  - Great for limited local storage capacity and want to extend that capacity.
 
 ### Snowball / Edge / Snowmobile
 
