@@ -45,10 +45,10 @@ standard protocols and methods ( http, https, ssh, RDP, vpn )
 ### Public vs Private vs Hybrid vs Multi Cloud
 
 - Public Cloud: using 1 public cloud such as AWS, Azure, Google Cloud.
-- Private Cloud: using on-premises real cloud. Must meet 5 requirements. Examples AWS outposts, Azure stack, Anthos from google.
+- Private Cloud: using on-premises real cloud. Must meet above 5 cloud computing requirements. Examples AWS outposts, Azure stack, Anthos from google.
 - Multi-Cloud: using more than 1 public cloud in one deployment.
 - Hybrid Cloud: using public and private clouds in one environment
-  - This is **NOT** using Public Cloud and Legacy on-premises hardware.
+  - This is **NOT** using Public Cloud and Legacy on-premises hardware which is called hybrid environment.
 
 ### Cloud Service Models
 
@@ -88,7 +88,7 @@ There are additional services such as *Function as a Service*,
     - No uniquely identified devices, no method for device to device communication. Everything is broadcasted using      transmission on shared medium.
 
   - Data Link ( CSMA/CD) - Frame
-    Frames are format of information to send over Layer 2 network. 
+    - Frames are format of information to send over Layer 2 network. 
     - Preamble/SFD - 56 bits(Start Frame Delimiter) : Allow devices to know the start of frame.
     - Destination/source Mac Addresses
     - Ether Type (ET) - Specifiy which layer 3 protocol(IP protocol commonly) used to keep data inside frame.
@@ -106,7 +106,7 @@ There are additional services such as *Function as a Service*,
     Devices at L2 have unique hardware (MAC) address
     
   - Network
-    The network layer adds the ability for cross-network addressing (IP Addresses). It allows packets to be routed across different layer 2 networks, via L2 Frame encapsulation and forwarding decisions using routes and route tables. Its Layer 3 which allows the internet to function
+    - The network layer adds the ability for cross-network addressing (IP Addresses). It allows packets to be routed across different layer 2 networks, via L2 Frame encapsulation and forwarding decisions using routes and route tables. Its Layer 3 which allows the internet to function
     - IP Addresses (IPV4/6) - cross network addressing.
     - ARP - Find the Mac address, for this IP
     - Route - Where to forward this packet
@@ -122,7 +122,7 @@ There are additional services such as *Function as a Service*,
 
 ### Host Layers
   - Transport
-    The transport layer adds Ports, error correction, retransmission, flow control and a connection orientated architecture.
+    - The transport layer adds Ports, error correction, retransmission, flow control and a connection orientated architecture.
     Below are the Layer 3 problems :-
   - Since each packet is routed independently from source IP to dest IP , it results in out of order packets at the destination
     L3 provides no ordering mechanism.
@@ -143,6 +143,10 @@ There are additional services such as *Function as a Service*,
     - Data 
   - TCP is a connection based protocol. A connection is established between two devices using a random port on a client and a    known port on server.
     - Network Address Translation (NAT) is the process of adjusting packets source and destination addresses to allow transit across different networks. The main types you will encounter are Static NAT, Dynamic NAT and Port Address Translation (PAT). NAT is most commonly experience in home or office networks where private IPv4 addresses are translated to a single public address, allowing outgoing internet access. 
+    - Static NAT : 1 private to 1 (fixed) public address (IGW). Static NAT is used when certian private IP addresses need access to internet using public IP and where these IP's are consistent. The router (NAT DEVICE) maintains a NAT Table, it maps PrivateIP: PublicIP (1:1) 
+    - Dynamic NAT : 1 private to 1st available public address. Here pool of public IP's are available.
+    - Port Address Translation (PAT) : Many private to 1 public (NATGW) , this is what used commonly in our home router where multiple devices (laptops, mobiles, tablets) connect to single IP address. This uses ports to identify individual devices.
+
     
   - Session
   - Presentation
