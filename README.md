@@ -143,11 +143,27 @@ There are additional services such as *Function as a Service*,
     - Data 
   - TCP is a connection based protocol. A connection is established between two devices using a random port on a client and a    known port on server.
     - Network Address Translation (NAT) is the process of adjusting packets source and destination addresses to allow transit across different networks. The main types you will encounter are Static NAT, Dynamic NAT and Port Address Translation (PAT). NAT is most commonly experience in home or office networks where private IPv4 addresses are translated to a single public address, allowing outgoing internet access. 
-    - Static NAT : 1 private to 1 (fixed) public address (IGW). Static NAT is used when certian private IP addresses need access to internet using public IP and where these IP's are consistent. The router (NAT DEVICE) maintains a NAT Table, it maps PrivateIP: PublicIP (1:1) 
-    - Dynamic NAT : 1 private to 1st available public address. Here pool of public IP's are available.
-    - Port Address Translation (PAT) : Many private to 1 public (NATGW) , this is what used commonly in our home router where multiple devices (laptops, mobiles, tablets) connect to single IP address. This uses ports to identify individual devices.
+      - Static NAT : 1 private to 1 (fixed) public address (IGW). Static NAT is used when certian private IP addresses need access to internet using public IP and where these IP's are consistent. The router (NAT DEVICE) maintains a NAT Table, it maps PrivateIP: PublicIP (1:1) 
+      - Dynamic NAT : 1 private to 1st available public address. Here pool of public IP's are available.
+      - Port Address Translation (PAT) : Many private to 1 public (NATGW) , this is what used commonly in our home router where multiple devices (laptops, mobiles, tablets) connect to single IP address. This uses ports to identify individual devices.
 
-    
+  - IPv4 Address space 
+    - CLASS A : START - 0.0.0.0  to END - 127.255.255.255 
+        - Total : 128 networks and 16,777,216 IP's each.
+    - CLASS B : START - 128.0.0.0 to END - 191.255.255.255 
+        - Total : 16,384 networks and 65,536 IP's each.
+    - CLASS C : START - 192.0.0.0 to END - 223.255.255.255
+        - Total : 2,097,152 networks and 256 IP's each.
+    - CLASS D : Multicast
+    - CLASS E : Reserved.
+    - Below are the private IP ranges defined as per RFC1918, which means they aren't publicly routable and are used as private networks or used by cloud platforms. This is where NAT is needed to translate these private IP's to public IP's.
+      - **10**.0.0.0 - **10**.255.255.255 (1*CLASS A Network)
+        - 16,777,216 IP addresses.
+      - **172.16**.0.0 - **172.31**.255.255 (16 * CLASS B Networks)
+        - 16 networks * 65,536 IPV4 addresses  
+      - **192.168.0**.0 - **192.168.255**.255 (256 * CLASS C Networks)
+        - 256 networks * 256 IPV4 addresses. 
+
   - Session
   - Presentation
   - Application
@@ -258,11 +274,12 @@ Two Types of VPC's exist :-
 by default.
 
 #### Default VPC Facts
+One per region - can be removed and recreated.
 
 VPC CIDR - defines start and end ranges of the VPC.
 IP CIDR of a default VPC is always: **172.31.0.0/16**
 
-Configured to have one subnet in each AZ in the region by default.
+Configured to have one subnet in each AZ in the region by default. Inside every default vpc, a smaller /20 subnet is created in **each AZ** in the region.
 
 Subnets are given one section of the IP ranges for the default service.
 In general do not use the Default VPC in a region because it is not flexible.
@@ -272,6 +289,10 @@ A subnet is smaller such as /20
 The higher the / number is, the smaller the grouping.
 
 Two /17's will fit into a /16, sixteen /20 subnets can fit into one /16.
+
+comes with pre configured IGW, SG and NACL.
+
+By default, subnets in default VPC assign public IPV4 addresses.
 
 ### Elastic Compute Cloud (EC2)
 
