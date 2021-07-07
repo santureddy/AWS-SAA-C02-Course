@@ -3464,6 +3464,8 @@ This can be used for licensing rights. If overlapping regions occur,
 the priority will always go to the most specific or smallest region. The US
 will be chosen over the North America record.
 
+- Geoproximity: Geoproximity routing lets Amazon Route 53 route traffic to your resources based on the geographic location of your users and your resources. You can also optionally choose to route more traffic or less to a given resource by specifying a value, known as a bias. A bias expands or shrinks the size of the geographic region from which traffic is routed to a resource.
+
 - Multi-value: Simple records use one name and multiple values in this record.
 These will be health checked and the unhealthy responses will automatically
 be removed. With multi-value, you can have multiple records with the same
